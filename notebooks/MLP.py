@@ -1,7 +1,9 @@
 import numpy as np
+from tqdm import tqdm
+from sklearn.metrics import r2_score, accuracy_score
 
 # Tuto
-# simple-nn-with-python-multi-layer-perceptron
+# https://www.kaggle.com/code/androbomb/simple-nn-with-python-multi-layer-perceptron
 
 def _sigmoid(x, der=False):
     # perform sigmoid
@@ -33,7 +35,7 @@ class MultiLayerPerceptron:
         def size():
             return self.size
 
-    def __init__(self, seed=10, alpha=0.1, layers=[]):
+    def __init__(self, seed=10, alpha=0.9, layers=[]):
         self.w = []
         self.b = []
         self.layers = []
@@ -55,6 +57,44 @@ class MultiLayerPerceptron:
     
     def feed_forward(self, w, b, act_f, x):
         return act_f(np.dot(w, x) + b)
+
+    def back_propagation(self, x, y):
+        W = []
+        B = []
+        delta = []
+
+        # Compute last error
+        delta.insert(0, (self.z[len(self.z)-1] - y) * self.act_f[len(self.z)-1](self.z[len(self.z)-1], der=True))
+        
+        '''Now we BACKpropagate'''
+        # We thus compute from next-to-last to first
+        for i in range(0, len(self.z) - 1):
+            if i == 0:
+                j = 0
+            else:
+                j = i - 1
+            delta.insert(0, np.dot(delta[j], self.w[len(self.z) - 1 - i]) * self.act_f[len(self.z) - 1 - i](self.z[len(self.z) - 1 - i], der=True))
+        
+        for i in range(0, len(delta)):
+            delta[i] = delta[i] / self.X.shape[0]
+        # print(delta[-1])
+   
+        '''GRADIENT DESCENT'''
+        # We start from the first layer that is special, since it is connected to the Input Layer
+        W.append(self.w[0] - self.alpha * np.kron(delta[0], x).reshape(len(self.z[0]), x.shape[0]))
+        B.append(self.b[0] - self.alpha * delta[0])
+        
+        # We now descend for all the other Hidden Layers + OutPut Layer
+        for i in range(1, len(self.z)):
+            W.append(self.w[i] - self.alpha * np.kron(delta[i], self.z[i-1]).reshape(len(self.z[i]), len(self.z[i-1])))
+            B.append(self.b[i] - self.alpha * delta[i])
+        
+
+        # print(type(self.w[-1]))
+        # print(type(W[-1]))
+        # We return the descended parameters w, b
+        return W, B
+
 
     def fit(self, X, Y, verbose=False, epochs=1):
         # fit
@@ -87,30 +127,35 @@ class MultiLayerPerceptron:
             print("w shape : ", self.w[i].shape, " b shape: ", self.b[i].shape)
             if verbose is True:
                 print(self.w[i], self.b[i])
-
-
-        # print("init Output layer ", len(self.layers) - 1)
-        # print('Number of neurons: ', self.layers[-1].size)
-        # self.w.append(np.random.randn(self.layers[-1].size , self.layers[1].size )/np.sqrt(2/self.layers[-2].size))
-        # self.b.append(np.random.randn(self.layers[-1].size)/np.sqrt(2/self.layers[-2].size))
-        # print("w shape : ", self.w[-1].shape, " b shape: ", self.b[-1].shape)
-        # self.act_f.append(self.layers[-1].get_act_f())
-        # if verbose is True:
-            # print(self.w[-1], self.b[-1])
         
-        for i in range(0, epochs):
-            for i in range(0, 5):
+        for epoch in range(0, epochs):
+            for i in range(0, self.X.shape[0]):
                 # print(self.X[i])
                 '''
                 Now we start the feed forward
                 '''  
                 self.z = []
 
-                self.z.append(self.feed_forward(self.w[0], self.b[0], self.act_f[0], self.X[i])) # First layers
+                self.z.append(self.feed_forward(self.w[0], self.b[0], self.act_f[0], self.X[i]))
                 # print(self.z[0])
-                for i in range(1, len(self.layers)): #Looping over layers
-                    self.z.append(self.feed_forward(self.w[i] , self.b[i], self.act_f[i], self.z[i-1]))
-                print(self.z)
+                for j in range(1, len(self.layers)):
+                    self.z.append(self.feed_forward(self.w[j] , self.b[j], self.act_f[j], self.z[j-1]))
+                # print(self.z)
+                self.w, self.b = self.back_propagation(self.X[i], self.Y[i])
+
+            y_pred = self.predict(X)
+            y_pred_hs = np.heaviside(np.array(y_pred) - 0.5, 0.5)
+            print(f"{epoch}/{epochs-1}: ", end="")
+            print(f"r2: {r2_score(self.Y, y_pred)}")
+            print(f"loss: {((self.Y - y_pred) * (self.Y - y_pred)).mean()}")
+            print(f"score: {accuracy_score(self.Y, y_pred_hs)}")
+            # print(np.heaviside(np.array(y_pred) - 0.5, 0.5))
+            # print(f"accuracy: {accuracy_score(self.Y, y_pred, )}")
+            # print(self.predict(X))
+            # print()
+            # self.mu.append(
+            #     (1/2) * np.dot(self.z[len(self.z)-1] - self.Y[I], self.z[len(self.z)-1] - self.Y[I]) 
+            # )
 
 
         # feed foward
@@ -120,8 +165,14 @@ class MultiLayerPerceptron:
         pass
 
     def predict(self, X):
-        # predict 
-        pass
+        y_pred = []
+        for i in range(0, X.shape[0]):
+            z = []
+            z.append(self.feed_forward(self.w[0], self.b[0], self.act_f[0], X[i]))
+            for i in range(1, len(self.layers)):
+                z.append(self.feed_forward(self.w[i] , self.b[i], self.act_f[i], z[i-1]))
+            y_pred.append(z[-1][0])
+        return y_pred
 
     def describe(self):
         pass
