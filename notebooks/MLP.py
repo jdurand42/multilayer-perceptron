@@ -1,6 +1,7 @@
 import numpy as np
 from tqdm import tqdm
 from sklearn.metrics import r2_score, accuracy_score
+import math
 
 # Tuto
 # https://www.kaggle.com/code/androbomb/simple-nn-with-python-multi-layer-perceptron
@@ -142,10 +143,11 @@ class MultiLayerPerceptron:
 
             y_pred = self.predict(X, raw=True)
             y_pred_hs = np.heaviside(np.array(y_pred) - self.treshold, self.treshold)
-            print(f"{epoch}/{epochs-1}: ", end="")
+            print(f"{epoch}/{epochs-1}:")
             print(f"r2: {r2_score(self.Y, y_pred)}")
             print(f"loss: {((self.Y - y_pred) * (self.Y - y_pred)).mean()}")
             print(f"score: {accuracy_score(self.Y, y_pred_hs)}")
+            print(f"binary cross_entropy: {self.binary_cross_entropy(y_pred, self.Y)}")
             # print(np.heaviside(np.array(y_pred) - 0.5, 0.5))
             # print(f"accuracy: {accuracy_score(self.Y, y_pred, )}")
             # print(self.predict(X))
@@ -171,7 +173,16 @@ class MultiLayerPerceptron:
             y_pred.append(z[-1][0])
         if raw == False:
             y_pred = np.heaviside(np.array(y_pred) - self.treshold, self.treshold)
-        return y_pred
+        return np.array(y_pred)
 
     def describe(self):
         pass
+    
+    def binary_cross_entropy(self, p, y):
+        r = 0
+        for i in range(0, len(p)):
+            if p[i] == 0:
+                p[i] += 1e15
+            r += (y[i] * math.log(p[i])) + ((1 - y[i]) * math.log(1 - p[i]))
+            r = -r / len(p)
+        return r
