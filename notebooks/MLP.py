@@ -35,7 +35,7 @@ class MultiLayerPerceptron:
         def size():
             return self.size
 
-    def __init__(self, seed=10, alpha=0.9, layers=[]):
+    def __init__(self, seed=10, alpha=0.9, layers=[], treshold=0.5):
         self.w = []
         self.b = []
         self.layers = []
@@ -43,6 +43,7 @@ class MultiLayerPerceptron:
         self.seed = seed
         self.act_f = []
         self.alpha = alpha
+        self.treshold = treshold
 
         np.random.seed(self.seed)
 
@@ -69,12 +70,9 @@ class MultiLayerPerceptron:
         '''Now we BACKpropagate'''
         # We thus compute from next-to-last to first
         for i in range(0, len(self.z) - 1):
-            if i == 0:
-                j = 0
-            else:
-                j = i - 1
-            delta.insert(0, np.dot(delta[j], self.w[len(self.z) - 1 - i]) * self.act_f[len(self.z) - 1 - i](self.z[len(self.z) - 1 - i], der=True))
+            delta.insert(0, np.dot(delta[0], self.w[len(self.z) - 1 - i]) * self.act_f[len(self.z) - 2 - i](self.z[len(self.z) - 2 - i], der=True))
         
+        # print(delta)
         for i in range(0, len(delta)):
             delta[i] = delta[i] / self.X.shape[0]
         # print(delta[-1])
@@ -120,9 +118,8 @@ class MultiLayerPerceptron:
         for i in range(1, len(self.layers)):
             print('Hidden Layer ', i)
             print('Number of neurons: ', self.layers[i].size)
-            print(self.layers[i].size, self.layers[i].size)
-            self.w.append( np.random.randn(self.layers[i].size , self.layers[i-1].size ))
-            self.b.append( np.random.randn(self.layers[i].size))
+            self.w.append(np.random.randn(self.layers[i].size , self.layers[i-1].size))
+            self.b.append(np.random.randn(self.layers[i].size))
             self.act_f.append(self.layers[i].get_act_f())
             print("w shape : ", self.w[i].shape, " b shape: ", self.b[i].shape)
             if verbose is True:
@@ -143,8 +140,8 @@ class MultiLayerPerceptron:
                 # print(self.z)
                 self.w, self.b = self.back_propagation(self.X[i], self.Y[i])
 
-            y_pred = self.predict(X)
-            y_pred_hs = np.heaviside(np.array(y_pred) - 0.5, 0.5)
+            y_pred = self.predict(X, raw=True)
+            y_pred_hs = np.heaviside(np.array(y_pred) - self.treshold, self.treshold)
             print(f"{epoch}/{epochs-1}: ", end="")
             print(f"r2: {r2_score(self.Y, y_pred)}")
             print(f"loss: {((self.Y - y_pred) * (self.Y - y_pred)).mean()}")
@@ -164,7 +161,7 @@ class MultiLayerPerceptron:
 
         pass
 
-    def predict(self, X):
+    def predict(self, X, raw=False):
         y_pred = []
         for i in range(0, X.shape[0]):
             z = []
@@ -172,6 +169,8 @@ class MultiLayerPerceptron:
             for i in range(1, len(self.layers)):
                 z.append(self.feed_forward(self.w[i] , self.b[i], self.act_f[i], z[i-1]))
             y_pred.append(z[-1][0])
+        if raw == False:
+            y_pred = np.heaviside(np.array(y_pred) - self.treshold, self.treshold)
         return y_pred
 
     def describe(self):
