@@ -2,6 +2,7 @@ import numpy as np
 from tqdm import tqdm
 from sklearn.metrics import r2_score, accuracy_score
 import math
+import pickle
 
 # Tuto
 # https://www.kaggle.com/code/androbomb/simple-nn-with-python-multi-layer-perceptron
@@ -40,11 +41,16 @@ class MultiLayerPerceptron:
         self.w = []
         self.b = []
         self.layers = []
-        self.mu = []
+        # self.mu = []
+        self.metrics = {'losses': [], 'scores': [], 'binary_cross_entropy': []}
+        # self.losses = []
+        # self.scores = []
+        # self.binary_cross_entropy = []
         self.seed = seed
         self.act_f = []
         self.alpha = alpha
         self.treshold = treshold
+        self.normalization = {}
 
         np.random.seed(self.seed)
 
@@ -94,35 +100,44 @@ class MultiLayerPerceptron:
         # We return the descended parameters w, b
         return W, B
 
+    def reset(self):
+        self.w = []
+        self.b = []
+        self.act_f = []
 
-    def fit(self, X, Y, verbose=False, epochs=1):
+    def fit(self, X, Y, verbose=False, epochs=1, normalization={}, _print=False):
         # fit
         # 
         # init of w and b for each layer
-        print("init of layers")
+        # print("init of layers")
 
-        print("init of input layer")
+        # print("init of input layer")
 
         self.X = X
         self.Y = Y
 
+        self.normalization = normalization
+        self.epochs = epochs
+
         if len(self.layers) < 2:
             raise RuntimeError("Error, mlp needs a minimum of an input and an output layer to perform")
+
+        self.reset()
 
         self.w.append(np.random.randn(self.layers[0].size , self.X.shape[1]))
         self.b.append(np.random.randn(self.layers[0].size))
         self.act_f.append(self.layers[0].get_act_f())
-        print("Input layer shape: ", self.w[0].shape, self.b[0].shape)
+        # print("Input layer shape: ", self.w[0].shape, self.b[0].shape)
         if verbose is True:
             print(self.w[0], self.b[0])
 
         for i in range(1, len(self.layers)):
-            print('Hidden Layer ', i)
-            print('Number of neurons: ', self.layers[i].size)
+            # print('Hidden Layer ', i)
+            # print('Number of neurons: ', self.layers[i].size)
             self.w.append(np.random.randn(self.layers[i].size , self.layers[i-1].size))
             self.b.append(np.random.randn(self.layers[i].size))
             self.act_f.append(self.layers[i].get_act_f())
-            print("w shape : ", self.w[i].shape, " b shape: ", self.b[i].shape)
+            # print("w shape : ", self.w[i].shape, " b shape: ", self.b[i].shape)
             if verbose is True:
                 print(self.w[i], self.b[i])
         
@@ -143,11 +158,20 @@ class MultiLayerPerceptron:
 
             y_pred = self.predict(X, raw=True)
             y_pred_hs = np.heaviside(np.array(y_pred) - self.treshold, self.treshold)
-            print(f"{epoch}/{epochs-1}:")
-            print(f"r2: {r2_score(self.Y, y_pred)}")
-            print(f"loss: {((self.Y - y_pred) * (self.Y - y_pred)).mean()}")
-            print(f"score: {accuracy_score(self.Y, y_pred_hs)}")
-            print(f"binary cross_entropy: {self.binary_cross_entropy(y_pred, self.Y)}")
+
+            self.metrics['losses'].append(((self.Y - y_pred)**2).mean())
+            self.metrics['scores'].append(accuracy_score(self.Y, y_pred_hs))
+            self.metrics['binary_cross_entropy'].append(self.binary_cross_entropy(y_pred, self.Y))
+
+            # self.scores.append(accuracy_score(self.Y, y_pred_hs))
+            if _print is True:
+                print(f"{epoch+1}/{epochs}:")
+                print(f"r2: {r2_score(self.Y, y_pred)}")
+                print(f"loss: {self.metrics['losses'][epoch]}")
+                print(f"score: {self.metrics['scores'][epoch]}")
+
+            
+            # print(f"binary cross_entropy: {self.binary_cross_entropy(y_pred, self.Y)}")
             # print(np.heaviside(np.array(y_pred) - 0.5, 0.5))
             # print(f"accuracy: {accuracy_score(self.Y, y_pred, )}")
             # print(self.predict(X))
@@ -160,9 +184,7 @@ class MultiLayerPerceptron:
         # feed foward
 
         # backprop
-
-        pass
-
+        
     def predict(self, X, raw=False):
         y_pred = []
         for i in range(0, X.shape[0]):
@@ -181,8 +203,14 @@ class MultiLayerPerceptron:
     def binary_cross_entropy(self, p, y):
         r = 0
         for i in range(0, len(p)):
-            if p[i] == 0:
-                p[i] += 1e15
+            p[i] += 1e-15
             r += (y[i] * math.log(p[i])) + ((1 - y[i]) * math.log(1 - p[i]))
             r = -r / len(p)
         return r
+
+    def score():
+        pass
+
+    def export(self, path="./mlp.pkl"):
+        pickle.dump(self, open(path, "wb+"))
+        print(f"successfuly exported in {path}")
