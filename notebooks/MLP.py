@@ -105,7 +105,7 @@ class MultiLayerPerceptron:
         self.b = []
         self.act_f = []
 
-    def fit(self, X, Y, verbose=False, epochs=1, normalization={}, _print=False):
+    def fit(self, X, Y, verbose=False, epochs=1, normalization={}, _print=False, X_test=None, Y_test=None):
         # fit
         # 
         # init of w and b for each layer
@@ -115,6 +115,13 @@ class MultiLayerPerceptron:
 
         self.X = X
         self.Y = Y
+
+        self.X_test = X_test
+        if self.X_test is None:
+            self.X_test = self.X
+        self.Y_test = Y_test
+        if self.Y_test is None:
+            self.Y_test = self.Y
 
         self.normalization = normalization
         self.epochs = epochs
@@ -156,17 +163,17 @@ class MultiLayerPerceptron:
                 # print(self.z)
                 self.w, self.b = self.back_propagation(self.X[i], self.Y[i])
 
-            y_pred = self.predict(X, raw=True)
+            y_pred = self.predict(self.X_test, raw=True)
             y_pred_hs = np.heaviside(np.array(y_pred) - self.treshold, self.treshold)
 
-            self.metrics['losses'].append(((self.Y - y_pred)**2).mean())
-            self.metrics['scores'].append(accuracy_score(self.Y, y_pred_hs))
-            self.metrics['binary_cross_entropy'].append(self.binary_cross_entropy(y_pred, self.Y))
+            self.metrics['losses'].append(((self.Y_test - y_pred)**2).mean())
+            self.metrics['scores'].append(accuracy_score(self.Y_test, y_pred_hs))
+            self.metrics['binary_cross_entropy'].append(self.binary_cross_entropy(y_pred, self.Y_test))
 
             # self.scores.append(accuracy_score(self.Y, y_pred_hs))
             if _print is True:
                 print(f"{epoch+1}/{epochs}:")
-                print(f"r2: {r2_score(self.Y, y_pred)}")
+                print(f"r2: {r2_score(self.Y_test, y_pred)}")
                 print(f"loss: {self.metrics['losses'][epoch]}")
                 print(f"score: {self.metrics['scores'][epoch]}")
 
