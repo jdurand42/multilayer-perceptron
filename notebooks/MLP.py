@@ -177,10 +177,11 @@ class MultiLayerPerceptron:
 
             # self.scores.append(accuracy_score(self.Y, y_pred_hs))
             if _print is True:
-                print(f"{epoch+1}/{epochs}:")
-                print(f"r2: {r2_score(self.Y_test, y_pred)}")
-                print(f"loss: {self.metrics['losses'][epoch]}")
-                print(f"score: {self.metrics['scores'][epoch]}")
+                print(f"{epoch+1}/{epochs}:", end=" - ")
+                print(f"r2: {r2_score(self.Y_test, y_pred)}", end=" - ")
+                print(f"loss: {self.metrics['losses'][-1]}", end=" - ")
+                print(f"score: {self.metrics['scores'][-1]}", end=" - ")
+                print(f"Log loss: {self.metrics['binary_cross_entropy'][-1]}")
 
         
     def predict(self, X, raw=False):
