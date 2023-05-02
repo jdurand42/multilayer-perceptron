@@ -22,8 +22,8 @@ def zscore(X, stds, means):
         i += 1
     return X
 
-def get_data(data_path, headers=["id", "diagnosis"]):
-    for i in range(len()):
+def get_data(data_path, headers=["id", "diagnosis"], features_len=30):
+    for i in range(0, features_len):
         headers.append(f'F{i}')
     df = pd.read_csv(data_path, names=headers)
     return df
@@ -37,11 +37,11 @@ def labelize_Y(Y, y_label="diagnosis", value="M"):
     Y = Y[y_label].apply(lambda x: 1 if x == value else 0)
     return Y
 
-def process_data(data_path):
-    df = get_data(data_path)
-    X,Y = get_X_Y(df)
-    Y = labelize_Y(Y)
-    return X, Y
+# def process_data(data_path):
+#     df = get_data(data_path)
+#     X,Y = get_X_Y(df)
+#     Y = labelize_Y(Y)
+#     return X, Y
 
 def normalize(X):
     means = means(X)

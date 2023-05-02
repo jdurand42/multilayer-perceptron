@@ -17,7 +17,7 @@ def _sigmoid(x, der=False):
 
 class MultiLayerPerceptron:
     class Layer:
-        def __init__(self, size=1, act_f="sigmoid", label="input_layer"):
+        def __init__(self, size=1, act_f="sigmoid", label="hidden_layer"):
             self.size = size
             self.f = act_f
             self.act_f = self.get_act_f()
@@ -60,7 +60,7 @@ class MultiLayerPerceptron:
 
     # Activations:
 
-    def add_layer(self, size=1, act_f="sigmoid", label="input_layer"):
+    def add_layer(self, size=1, act_f="sigmoid", label="hidden_layer"):
         self.layers.append(self.Layer(size=size, act_f=act_f, label=label))
     
     def feed_forward(self, w, b, act_f, x):
@@ -135,12 +135,17 @@ class MultiLayerPerceptron:
         self.b.append(np.random.randn(self.layers[0].size))
         self.act_f.append(self.layers[0].get_act_f())
         # print("Input layer shape: ", self.w[0].shape, self.b[0].shape)
+
+        if _print is True:
+            print(f'{self.layers[0].label}', 0)
+            print('Number of neurons: ', self.layers[0].size)
         if verbose is True:
             print(self.w[0], self.b[0])
 
         for i in range(1, len(self.layers)):
-            # print('Hidden Layer ', i)
-            # print('Number of neurons: ', self.layers[i].size)
+            if _print is True:
+                print(f'{self.layers[i].label}', i)
+                print('Number of neurons: ', self.layers[i].size)
             self.w.append(np.random.randn(self.layers[i].size , self.layers[i-1].size))
             self.b.append(np.random.randn(self.layers[i].size))
             self.act_f.append(self.layers[i].get_act_f())
@@ -177,20 +182,6 @@ class MultiLayerPerceptron:
                 print(f"loss: {self.metrics['losses'][epoch]}")
                 print(f"score: {self.metrics['scores'][epoch]}")
 
-            
-            # print(f"binary cross_entropy: {self.binary_cross_entropy(y_pred, self.Y)}")
-            # print(np.heaviside(np.array(y_pred) - 0.5, 0.5))
-            # print(f"accuracy: {accuracy_score(self.Y, y_pred, )}")
-            # print(self.predict(X))
-            # print()
-            # self.mu.append(
-            #     (1/2) * np.dot(self.z[len(self.z)-1] - self.Y[I], self.z[len(self.z)-1] - self.Y[I]) 
-            # )
-
-
-        # feed foward
-
-        # backprop
         
     def predict(self, X, raw=False):
         y_pred = []
