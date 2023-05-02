@@ -37,6 +37,10 @@ def labelize_Y(Y, y_label="diagnosis", value="M"):
     Y = Y[y_label].apply(lambda x: 1 if x == value else 0)
     return Y
 
+def unlabelize_Y(Y, y_label="diagnosis", values=("B", "M")):
+    Y = Y[y_label].apply(lambda x: values[1] if x == 1 else values[0])
+    return Y
+
 # def process_data(data_path):
 #     df = get_data(data_path)
 #     X,Y = get_X_Y(df)

@@ -199,11 +199,11 @@ class MultiLayerPerceptron:
     def describe(self):
         pass
     
-    def binary_cross_entropy(self, p, y):
+    def binary_cross_entropy(self, p, y, e=1e-15):
         r = 0
         for i in range(0, len(p)):
-            p[i] += 1e-15
-            r += (y[i] * math.log(p[i])) + ((1 - y[i]) * math.log(1 - p[i]))
+            # p[i] += e
+            r += (y[i] * math.log(p[i]+e)) + ((1 - y[i]) * math.log(1 - p[i]+e))
             r = -r / len(p)
         return r
 
