@@ -13,15 +13,15 @@ import argparse
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--data_path', type=str, default='../data/data.csv',
+parser.add_argument('-d', '--data_path', type=str, default='../data/data.csv',
                     help='path to csv file containing data')
 parser.add_argument('-e','--early_stopping', type=int, default = None,
                     help='number of epochs needed for early stopping')
-# parser.add_argument('-p','--prescision', type=int, default = 5,
-#                     help='prescision for early stopping')
+parser.add_argument('-p','--precision', type=int, default = 5,
+                    help='precision for early stopping')
 parser.add_argument('--export_path', type=str, default = "mlp.pkl",
                     help='Output path for model pkl')
-parser.add_argument('--split', type=float, default = 1-(350/569),
+parser.add_argument('-s', '--split', type=float, default = 1-(350/569),
                     help='ratio for split')
 parser.add_argument('--seed', type=int, default=1)
 parser.add_argument('--hidden_layers_number', type=int, default=2)
@@ -70,7 +70,8 @@ if __name__ == "__main__":
     mlp.fit(X_train.to_numpy(), Y_train.to_numpy(), verbose=args.verbose,
             epochs=args.epochs, normalization={'stds': stds, 'means': means},
             _print=args.no_print,
-            X_test=X_test.to_numpy(), Y_test=Y_test.to_numpy())
+            X_test=X_test.to_numpy(), Y_test=Y_test.to_numpy(),
+            early_stopping=args.early_stopping, precision=args.precision)
 
     mlp.export(path=args.export_path)
 

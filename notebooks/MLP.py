@@ -105,7 +105,7 @@ class MultiLayerPerceptron:
         self.b = []
         self.act_f = []
 
-    def fit(self, X, Y, verbose=False, epochs=1, normalization={}, _print=False, X_test=None, Y_test=None):
+    def fit(self, X, Y, verbose=False, epochs=1, normalization={}, _print=False, X_test=None, Y_test=None, early_stopping=None, precision=5):
         # fit
         # 
         # init of w and b for each layer
@@ -125,6 +125,11 @@ class MultiLayerPerceptron:
 
         self.normalization = normalization
         self.epochs = epochs
+
+        # Early stopping
+        it = 0
+        min_loss = np.inf
+
 
         if len(self.layers) < 2:
             raise RuntimeError("Error, mlp needs a minimum of an input and an output layer to perform")
@@ -183,6 +188,17 @@ class MultiLayerPerceptron:
                 print(f"score: {self.metrics['scores'][-1]}", end=" - ")
                 print(f"Log loss: {self.metrics['binary_cross_entropy'][-1]}")
 
+            if early_stopping is not None:
+                loss = self.metrics['losses'][-1]
+                if np.round(loss, precision) < np.round(min_loss,precision):
+                    min_loss = loss
+                    count = 0
+                else :
+                    count += 1
+                    if count > early_stopping:
+                        print('early stopping at iteration : ', epoch)
+                        break
+        self.epochs = len(self.metrics['losses'])
         
     def predict(self, X, raw=False):
         y_pred = []
