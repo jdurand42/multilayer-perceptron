@@ -5,6 +5,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, accuracy_score
 from sklearn.metrics import confusion_matrix
 
+from sklearn.metrics import log_loss
+
 from utils import *
 from MLP import MultiLayerPerceptron
 import pickle
@@ -55,3 +57,5 @@ if __name__ == "__main__":
 
     e = mlp.binary_cross_entropy(y_pred, Y.to_numpy(), e=1e-15)
     print("Binary cross entropy: ", e)
+    # e = log_loss(Y.to_numpy(), y_pred, normalize=True, eps=1e-15)
+    # print("Binary cross entropy: ", e)

@@ -108,7 +108,8 @@ class MultiLayerPerceptron:
     def fit(self, X, Y, verbose=False, epochs=1, 
             normalization={}, _print=False, 
             X_test=None, Y_test=None, 
-            early_stopping=None, precision=5):
+            early_stopping=None, 
+            precision=5):
         # fit
         # 
         # init of w and b for each layer
@@ -222,8 +223,8 @@ class MultiLayerPerceptron:
         r = 0
         for i in range(0, len(p)):
             # p[i] += e
-            r += (y[i] * math.log(p[i]+e)) + ((1 - y[i]) * math.log(1 - p[i]+e))
-            r = -r / len(p)
+            r += (np.dot(y[i], math.log(p[i]+e))) + (np.dot((1 - y[i]), math.log(1 - p[i]+e)))
+        r = -r / len(p)
         return r
 
     def score():
