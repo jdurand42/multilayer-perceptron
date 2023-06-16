@@ -21,7 +21,7 @@ parser.add_argument('--data_path', type=str, default='../data/data.csv',
 parser.add_argument('--model_path', type=str, default="mlp.pkl")
 parser.add_argument('--raw', action="store_true")
 parser.add_argument('--no_print', action="store_false")
-parser.add_argument('--head', type=int, default=15)
+parser.add_argument('--head', type=int, default=3)
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -54,7 +54,8 @@ if __name__ == "__main__":
     if args.raw is False:
         pred = unlabelize_Y(pred, y_label="diagnosis", values=("B", "M"))
         print(pred.head(args.head))
-
+    if args.raw is False:
+        print("score: ", accuracy_score(Y.to_numpy(), y_pred))
     e = mlp.binary_cross_entropy(y_pred, Y.to_numpy(), e=1e-15)
     print("Binary cross entropy: ", e)
     # e = log_loss(Y.to_numpy(), y_pred, normalize=True, eps=1e-15)

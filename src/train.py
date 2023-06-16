@@ -82,8 +82,9 @@ if __name__ == "__main__":
     print(cm)
 
     y_pred_raw = mlp.predict(X_test.to_numpy(), raw=True)
-    e = binary_cross_entropy(y_pred_raw, Y_test.to_numpy())
+    e = binary_cross_entropy(y_pred, Y_test.to_numpy())
     print("Binary cross entropy: ", e)
+    print("score: ", accuracy_score(Y_test.to_numpy(), y_pred))
     # e = binary_cross_entropy(y_pred, Y_test.to_numpy())
     # print(e)
 
