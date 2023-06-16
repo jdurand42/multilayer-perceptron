@@ -40,7 +40,7 @@ if __name__ == "__main__":
     raw = X.copy()
 
     print(df.describe())
-
+    
     print(X.head(2))
     print(Y.head(2))
 

@@ -37,7 +37,7 @@ class MultiLayerPerceptron:
         def size():
             return self.size
 
-    def __init__(self, seed=10, alpha=0.9, layers=[], treshold=0.5):
+    def __init__(self, seed=10, alpha=0.1, layers=[], treshold=0.5):
         self.w = []
         self.b = []
         self.layers = []
@@ -105,7 +105,10 @@ class MultiLayerPerceptron:
         self.b = []
         self.act_f = []
 
-    def fit(self, X, Y, verbose=False, epochs=1, normalization={}, _print=False, X_test=None, Y_test=None, early_stopping=None, precision=5):
+    def fit(self, X, Y, verbose=False, epochs=1, 
+            normalization={}, _print=False, 
+            X_test=None, Y_test=None, 
+            early_stopping=None, precision=5):
         # fit
         # 
         # init of w and b for each layer
@@ -193,10 +196,10 @@ class MultiLayerPerceptron:
                 if np.round(loss, precision) < np.round(min_loss,precision):
                     min_loss = loss
                     count = 0
-                else :
+                else:
                     count += 1
-                    if count > early_stopping:
-                        print('early stopping at iteration : ', epoch)
+                    if count >= early_stopping:
+                        print('early stopping at iteration : ', epoch+1)
                         break
         self.epochs = len(self.metrics['losses'])
         
