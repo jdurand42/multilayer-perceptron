@@ -7,6 +7,12 @@ import pickle
 # Tuto
 # https://www.kaggle.com/code/androbomb/simple-nn-with-python-multi-layer-perceptron
 
+# A FAIRE
+# Retirer les commentaires
+# Le prdict doit marcher avec un dataset sans y
+# Faire le softmax
+# 3 scripts
+
 def _sigmoid(x, der=False):
     # perform sigmoid
     if der is False:

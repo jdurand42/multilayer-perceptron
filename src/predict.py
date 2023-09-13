@@ -16,20 +16,21 @@ import argparse
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--data_path', type=str, default='../data/data.csv',
+parser.add_argument('--data_path', '-d', type=str, default='../data/data.csv',
                     help='path to csv file containing data')
-parser.add_argument('--model_path', type=str, default="mlp.pkl")
+parser.add_argument('--model_path', '-m', type=str, default="mlp.pkl")
 parser.add_argument('--raw', action="store_true")
 parser.add_argument('--no_print', action="store_false")
 parser.add_argument('--head', type=int, default=3)
+parser.add_argument('--export', '-e', type=str, default=None)
 
 if __name__ == "__main__":
     args = parser.parse_args()
 
-    df = get_data(args.data_path, headers=["id", "diagnosis"])
-    X, Y = get_X_Y(df, labels=["diagnosis"], drops=['id'])
-    pred = Y.copy()
-    Y = labelize_Y(Y, y_label="diagnosis", value="M")
+    df = get_data_pred(args.data_path)
+    X = df
+    # pred = Y.copy()
+    # Y = labelize_Y(Y, y_label="diagnosis", value="M")
 
     raw = X.copy()
 
@@ -45,18 +46,21 @@ if __name__ == "__main__":
 
     X = zscore(X, stds, means)
 
-    print(X.head(5))
+    # print(X.head(5))
 
     y_pred = mlp.predict(X.to_numpy(), raw=args.raw)
-    pred['diagnosis'] = y_pred
+    pred = pd.DataFrame(data={'diagnosis': y_pred})
     print(pred.head(args.head))
-    # df = pd.DataFrame(y_pred, names=["diagnosis"])
     if args.raw is False:
         pred = unlabelize_Y(pred, y_label="diagnosis", values=("B", "M"))
         print(pred.head(args.head))
-    if args.raw is False:
-        print("score: ", accuracy_score(Y.to_numpy(), y_pred))
-    e = mlp.binary_cross_entropy(y_pred, Y.to_numpy(), e=1e-15)
-    print("Binary cross entropy: ", e)
+    # if args.raw is False:
+    #     print("score: ", accuracy_score(Y.to_numpy(), y_pred))
+    # e = mlp.binary_cross_entropy(y_pred, Y.to_numpy(), e=1e-15)
+    # print("Binary cross entropy: ", e)
+
+    if args.export is not None:
+        pred.to_csv(args.export)
+
     # e = log_loss(Y.to_numpy(), y_pred, normalize=True, eps=1e-15)
     # print("Binary cross entropy: ", e)

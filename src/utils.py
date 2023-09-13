@@ -28,10 +28,20 @@ def get_data(data_path, headers=["id", "diagnosis"], features_len=30):
     df = pd.read_csv(data_path, names=headers)
     return df
 
+def get_data_pred(data_path):
+    df = pd.read_csv(data_path)
+    return df
+
 def get_X_Y(df, labels=["diagnosis"], drops=['id']):
     Y = df[labels]
     X = df.drop(labels=labels+drops, axis=1, inplace=False)
     return X, Y
+
+# def get_X(df):
+    # for key in drops:
+        # if key in X.columns:
+            # X = df.drop(labels=[key], axis=1, inplace=False)
+    # return X
 
 def labelize_Y(Y, y_label="diagnosis", value="M"):
     Y = Y[y_label].apply(lambda x: 1 if x == value else 0)

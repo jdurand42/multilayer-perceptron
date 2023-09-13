@@ -15,14 +15,13 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-d', '--data_path', type=str, default='../data/data.csv',
                     help='path to csv file containing data')
+parser.add_argument("-f", "--data-folder", type=str, default="../data")
 parser.add_argument('-e','--early_stopping', type=int, default = None,
                     help='number of epochs needed for early stopping')
 parser.add_argument('-p','--precision', type=int, default = 5,
                     help='precision for early stopping')
 parser.add_argument('--export_path', type=str, default = "mlp.pkl",
                     help='Output path for model pkl')
-parser.add_argument('-s', '--split', type=float, default = 1-(350/569),
-                    help='ratio for split')
 parser.add_argument('--seed', type=int, default=1)
 parser.add_argument('--hidden_layers_number', type=int, default=2)
 parser.add_argument('--hidden_layers_size', type=int, default=32)
@@ -33,6 +32,7 @@ parser.add_argument("--verbose", action="store_true")
 if __name__ == "__main__":
     args = parser.parse_args()
 
+    if 
     df = get_data(args.data_path, headers=["id", "diagnosis"])
     X, Y = get_X_Y(df, labels=["diagnosis"], drops=['id'])
     Y = labelize_Y(Y, y_label="diagnosis", value="M")
@@ -44,12 +44,9 @@ if __name__ == "__main__":
     print(X.head(2))
     print(Y.head(2))
 
-    stds = stds(X)
-    means = means(X)
-
-    X = zscore(X, stds, means)
-
     print(X.head(5))
+
+    
 
     if args.split != 0:
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=args.split)
@@ -58,6 +55,12 @@ if __name__ == "__main__":
         X_test = X.copy()
         Y_train = Y.copy()
         Y_test = Y.copy()
+
+
+    stds = stds(X_train)
+    means = means(X_train)
+    X_train = zscore(X_train, stds, means)
+    X_test = zscore(X_test, stds, means)
 
     print("Train set size: ", len(X_train), ", test set size: ", len(X_test))
     
