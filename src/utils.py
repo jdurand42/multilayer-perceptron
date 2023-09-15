@@ -63,9 +63,9 @@ def normalize(X):
     stds = stds(X)
     return zscore(X, stds, means)
 
-def binary_cross_entropy(p, y, e=1e-15):
-    r = 0
-    for i in range(0, len(p)):
-        r += (y[i] * math.log(p[i]+e)) + ((1 - y[i]) * math.log(1 - p[i]+e))
-    r = -r / len(p)
-    return r
+# def binary_cross_entropy(p, y, e=1e-15):
+#     r = 0
+#     for i in range(0, len(p)):
+#         r += (y[i] * math.log(p[i]+e)) + ((1 - y[i]) * math.log(1 - p[i]+e))
+#     r = -r / len(p)
+#     return r

@@ -231,7 +231,10 @@ class MultiLayerPerceptron:
             z.append(self.feed_forward(self.w[0], self.b[0], self.act_f[0], X[i]))
             for i in range(1, len(self.layers)):
                 z.append(self.feed_forward(self.w[i] , self.b[i], self.act_f[i], z[i-1]))
-            y_pred.append(z[-1][0])
+            if z[-1].shape[0] == 1:
+                y_pred.append(z[-1][0])
+            else:
+                y_pred.append(z[-1])
         if raw == False:
             y_pred = np.heaviside(np.array(y_pred) - self.treshold, self.treshold)
         return np.array(y_pred)
@@ -243,7 +246,7 @@ class MultiLayerPerceptron:
         r = 0
         for i in range(0, len(p)):
             # p[i] += e
-            r += (np.dot(y[i], math.log(p[i]+e))) + (np.dot((1 - y[i]), math.log(1 - p[i]+e)))
+            r += (np.dot(y[i], np.log(p[i]+e))) + (np.dot((1 - y[i]), np.log(1 - p[i]+e)))
         r = -r / len(p)
         return r
 

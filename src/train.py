@@ -40,8 +40,11 @@ if __name__ == "__main__":
     X_train, Y_train = get_X_Y(df_train, labels=["diagnosis"], drops=[])
     X_test, Y_test = get_X_Y(df_test, labels=["diagnosis"], drops=[])
 
-    Y_train = labelize_Y(Y_train, y_label="diagnosis", value="M")
-    Y_test = labelize_Y(Y_test, y_label="diagnosis", value="M")
+    Y_train = pd.get_dummies(Y_train.diagnosis)
+    Y_test = pd.get_dummies(Y_test.diagnosis)
+    print(Y_train.head(5))
+    # Y_train = labelize_Y(Y_train, y_label="diagnosis", value="M")
+    # Y_test = labelize_Y(Y_test, y_label="diagnosis", value="M")
     
 
     # raw = X.copy()
@@ -65,7 +68,7 @@ if __name__ == "__main__":
     
     for i in range(0, args.hidden_layers_number):
         mlp.add_layer(size=args.hidden_layers_size)
-    mlp.add_layer(label="output_layer", size=1, act_f="softmax")
+    mlp.add_layer(label="output_layer", size=2, act_f="softmax")
 
     mlp.fit(X_train.to_numpy(), Y_train.to_numpy(), verbose=args.verbose,
             epochs=args.epochs, normalization={'stds': stds, 'means': means},
@@ -78,7 +81,8 @@ if __name__ == "__main__":
     y_pred = mlp.predict(X_test.to_numpy())
     print('score: ', accuracy_score(Y_test, y_pred))
 
-    cm = confusion_matrix(y_pred, Y_test.to_numpy())
+    print(y_pred)
+    cm = confusion_matrix(y_pred.idxmax(1), Y_test.idxmax(1).to_numpy())
     print(cm)
 
     y_pred_raw = mlp.predict(X_test.to_numpy(), raw=True)
