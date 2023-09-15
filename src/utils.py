@@ -63,6 +63,20 @@ def normalize(X):
     stds = stds(X)
     return zscore(X, stds, means)
 
+def encode(y, label="diagnosis"):
+    return  pd.get_dummies(y[label])
+
+def unencode(y, label="diagnosis", values=["B", "M"]):
+    r = pd.DataFrame(columns=[label])
+    b = []
+    for i in range(0, len(y)):
+        for j in range(0, len(values)):
+            if y[i][j] == 1:
+                b.append(values[j])
+    r[label] = b
+    return r
+
+# def unencode_binary(y, label="diagnosis", values=[])
 # def binary_cross_entropy(p, y, e=1e-15):
 #     r = 0
 #     for i in range(0, len(p)):

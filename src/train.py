@@ -23,6 +23,8 @@ parser.add_argument('-p','--precision', type=int, default = 5,
                     help='precision for early stopping')
 parser.add_argument('--export_path', type=str, default = "mlp.pkl",
                     help='Output path for model pkl')
+parser.add_argument('--softmax', action="store_true",
+                    help="Perform one hot encoding and use softmax zith an output layer size of 2")
 parser.add_argument('--seed', type=int, default=1)
 parser.add_argument('--hidden_layers_number', type=int, default=2)
 parser.add_argument('--hidden_layers_size', type=int, default=32)
@@ -40,11 +42,14 @@ if __name__ == "__main__":
     X_train, Y_train = get_X_Y(df_train, labels=["diagnosis"], drops=[])
     X_test, Y_test = get_X_Y(df_test, labels=["diagnosis"], drops=[])
 
-    Y_train = pd.get_dummies(Y_train.diagnosis)
-    Y_test = pd.get_dummies(Y_test.diagnosis)
+    if args.softmax is True:
+        Y_train = encode(Y_train)
+        Y_test = encode(Y_test)
+    else:
+        Y_train = labelize_Y(Y_train, y_label="diagnosis", value="M")
+        Y_test = labelize_Y(Y_test, y_label="diagnosis", value="M")
+
     print(Y_train.head(5))
-    # Y_train = labelize_Y(Y_train, y_label="diagnosis", value="M")
-    # Y_test = labelize_Y(Y_test, y_label="diagnosis", value="M")
     
 
     # raw = X.copy()
@@ -68,7 +73,10 @@ if __name__ == "__main__":
     
     for i in range(0, args.hidden_layers_number):
         mlp.add_layer(size=args.hidden_layers_size)
-    mlp.add_layer(label="output_layer", size=2, act_f="softmax")
+    if args.softmax is True:
+        mlp.add_layer(label="output_layer", size=2, act_f="softmax")
+    else:
+        mlp.add_layer(label="output_layer", size=1, act_f="softmax")
 
     mlp.fit(X_train.to_numpy(), Y_train.to_numpy(), verbose=args.verbose,
             epochs=args.epochs, normalization={'stds': stds, 'means': means},
@@ -81,12 +89,17 @@ if __name__ == "__main__":
     y_pred = mlp.predict(X_test.to_numpy())
     print('score: ', accuracy_score(Y_test, y_pred))
 
-    print(y_pred)
-    cm = confusion_matrix(y_pred.idxmax(1), Y_test.idxmax(1).to_numpy())
+    if args.softmax is True:
+        y_pred_b = unencode(y_pred, values=[0, 1])
+        Y_test_b = unencode(Y_test.to_numpy(), values=[0, 1])
+        cm = confusion_matrix(y_pred_b, Y_test_b)
+    else:
+        cm = confusion_matrix(y_pred, Y_test.to_numpy())
+    
     print(cm)
 
-    y_pred_raw = mlp.predict(X_test.to_numpy(), raw=True)
-    e = binary_cross_entropy(y_pred, Y_test.to_numpy())
+    # y_pred_raw = mlp.predict(X_test.to_numpy(), raw=True)
+    e = mlp.binary_cross_entropy(y_pred, Y_test.to_numpy())
     print("Binary cross entropy: ", e)
     print("score: ", accuracy_score(Y_test.to_numpy(), y_pred))
     # e = binary_cross_entropy(y_pred, Y_test.to_numpy())

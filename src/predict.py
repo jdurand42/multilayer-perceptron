@@ -26,6 +26,8 @@ parser.add_argument('--no_print', action="store_false")
 parser.add_argument('--head', type=int, default=3)
 parser.add_argument('--export', '-e', type=str, default=None)
 parser.add_argument('-f', '--features', type=list, default=features)
+parser.add_argument('--softmax', action="store_true",
+                    help="Perform one hot encoding and use softmax zith an output layer size of 2")
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -53,11 +55,12 @@ if __name__ == "__main__":
     # print(X.head(5))
 
     y_pred = mlp.predict(X.to_numpy(), raw=args.raw)
-    pred = pd.DataFrame(data={'diagnosis': y_pred})
+    if (y_pred.shape[1] == 1):
+        pred = pd.DataFrame(data={'diagnosis': y_pred})
+    else:
+        pred = unencode(y_pred, values=["B", "M"], label="diagnosis")
     print(pred.head(args.head))
-    if args.raw is False:
-        pred = unlabelize_Y(pred, y_label="diagnosis", values=("B", "M"))
-        print(pred.head(args.head))
+
     # if args.raw is False:
     #     print("score: ", accuracy_score(Y.to_numpy(), y_pred))
     # e = mlp.binary_cross_entropy(y_pred, Y.to_numpy(), e=1e-15)
