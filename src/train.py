@@ -65,7 +65,7 @@ if __name__ == "__main__":
     
     for i in range(0, args.hidden_layers_number):
         mlp.add_layer(size=args.hidden_layers_size)
-    mlp.add_layer(label="output_layer")
+    mlp.add_layer(label="output_layer", size=1, act_f="softmax")
 
     mlp.fit(X_train.to_numpy(), Y_train.to_numpy(), verbose=args.verbose,
             epochs=args.epochs, normalization={'stds': stds, 'means': means},

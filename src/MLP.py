@@ -21,6 +21,18 @@ def _sigmoid(x, der=False):
         r = 1 / (1 + np.exp(-x)) * (1 - 1 / (1 + np.exp(-x)))
     return r
 
+def _softmax(x, der=False):
+    # print(x.shape)
+    if x.shape[0] == 1:
+        return _sigmoid(x, der=der)
+    r = x.copy()
+    if der is False:
+        for i in range(0, len(x)):
+            r[i] = np.exp(x[i]) / (np.exp(x).sum())
+        # print(r)
+    # print("ici")
+    return r
+
 class MultiLayerPerceptron:
     class Layer:
         def __init__(self, size=1, act_f="sigmoid", label="hidden_layer"):
@@ -37,6 +49,8 @@ class MultiLayerPerceptron:
                 return self.f
             if self.f == "sigmoid":
                 return _sigmoid
+            elif self.f == "softmax":
+                return _softmax
             else:
                 raise TypeError(f"Error: unknown activation function: {self.f}")
         

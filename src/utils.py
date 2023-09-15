@@ -17,6 +17,7 @@ def means(X):
 
 def zscore(X, stds, means):
     i = 0
+    X = X.copy()
     for feature in X.columns:
         X[feature] = (X[feature] - means[i]) / stds[i]
         i += 1
