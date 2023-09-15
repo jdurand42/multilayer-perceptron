@@ -11,10 +11,12 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument('-d', '--data_path', type=str, default='../data/data.csv',
                     help='path to csv file containing data')
-parser.add_argument('-r', '--ratio', type=float, default = 1-(350/569),
+parser.add_argument('-r', '--ratio', type=float, default = 0.2,
                     help='ratio for test split')
-parser.add_argument('--seed', type=int, default=1)
-parser.add_argument('-e', '--export_path', type=str, default = "../data/",
+parser.add_argument('--seed', type=int, default=None)
+parser.add_argument('--export_path_train', type=str, default = "../data/df_train.csv",
+                    help='Output path for model pkl')
+parser.add_argument('-e', '--export_path_test', type=str, default = "../data/df_test.csv",
                     help='Output path for model pkl')
 
 if __name__ == "__main__":
@@ -30,16 +32,21 @@ if __name__ == "__main__":
     print(Y.head(2))
 
     if args.ratio != 0:
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=args.ratio)
+        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=args.ratio, random_state=args.seed)
     else:
         X_train = X.copy()
         X_test = X.copy()
         Y_train = Y.copy()
         Y_test = Y.copy()
-    
-    X_train.to_csv(f"{args.export_path}/X_train.csv")
-    X_test.to_csv(f"{args.export_path}/X_test.csv") 
-    Y_test.to_csv(f"{args.export_path}/Y_test.csv")
-    Y_train.to_csv(f"{args.export_path}/Y_train.csv") 
+    df_train = pd.concat([X_train, Y_train], axis=1)
+    df_test = pd.concat([X_test, Y_test], axis=1)
 
-    print(f"successfully exported the sets in {args.data_path} folder")
+    df_train.to_csv(f"{args.export_path_train}", index=False)
+    df_test.to_csv(f"{args.export_path_test}", index=False)
+
+    # X_train.to_csv(f"{args.export_path}/X_train.csv")
+    # X_test.to_csv(f"{args.export_path}/X_test.csv") 
+    # Y_test.to_csv(f"{args.export_path}/Y_test.csv")
+    # Y_train.to_csv(f"{args.export_path}/Y_train.csv") 
+
+    print(f"successfully exported the sets in '{args.export_path_train}' and '{args.export_path_test}' folder")

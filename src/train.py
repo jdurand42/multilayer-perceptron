@@ -13,9 +13,10 @@ import argparse
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-d', '--data_path', type=str, default='../data/data.csv',
-                    help='path to csv file containing data')
-parser.add_argument("-f", "--data-folder", type=str, default="../data")
+parser.add_argument('--data_path_train', type=str, default='../data/df_train.csv',
+                    help='path to csv file containing data for train')
+parser.add_argument('--data_path_test', type=str, default='../data/df_test.csv',
+                    help='path to csv file containing data for train')
 parser.add_argument('-e','--early_stopping', type=int, default = None,
                     help='number of epochs needed for early stopping')
 parser.add_argument('-p','--precision', type=int, default = 5,
@@ -32,30 +33,26 @@ parser.add_argument("--verbose", action="store_true")
 if __name__ == "__main__":
     args = parser.parse_args()
 
-    if 
-    df = get_data(args.data_path, headers=["id", "diagnosis"])
-    X, Y = get_X_Y(df, labels=["diagnosis"], drops=['id'])
-    Y = labelize_Y(Y, y_label="diagnosis", value="M")
+    df_train = pd.read_csv(args.data_path_train)
+    df_test = pd.read_csv(args.data_path_test)
 
-    raw = X.copy()
+    # df = get_data(args.data_path, headers=["id", "diagnosis"])
+    X_train, Y_train = get_X_Y(df_train, labels=["diagnosis"], drops=[])
+    X_test, Y_test = get_X_Y(df_test, labels=["diagnosis"], drops=[])
 
-    print(df.describe())
-    
-    print(X.head(2))
-    print(Y.head(2))
-
-    print(X.head(5))
-
+    Y_train = labelize_Y(Y_train, y_label="diagnosis", value="M")
+    Y_test = labelize_Y(Y_test, y_label="diagnosis", value="M")
     
 
-    if args.split != 0:
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=args.split)
-    else:
-        X_train = X.copy()
-        X_test = X.copy()
-        Y_train = Y.copy()
-        Y_test = Y.copy()
+    # raw = X.copy()
 
+    print(df_train.describe())
+
+    print(X_train.head(2))
+    print(Y_train.head(2))
+    print("shape:", X_train.shape)
+
+    print(X_test.head(2))
 
     stds = stds(X_train)
     means = means(X_train)
