@@ -9,14 +9,14 @@ import argparse
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-d', '--data_path', type=str, default='../data/data.csv',
+parser.add_argument('-d', '--data_path', type=str, default='./data/data.csv',
                     help='path to csv file containing data')
 parser.add_argument('-r', '--ratio', type=float, default = 0.2,
                     help='ratio for test split')
 parser.add_argument('--seed', type=int, default=None)
-parser.add_argument('--export_path_train', type=str, default = "../data/df_train.csv",
+parser.add_argument('--export_path_train', type=str, default = "./data/df_train.csv",
                     help='Output path for model pkl')
-parser.add_argument('-e', '--export_path_test', type=str, default = "../data/df_test.csv",
+parser.add_argument('-e', '--export_path_test', type=str, default = "./data/df_test.csv",
                     help='Output path for model pkl')
 
 if __name__ == "__main__":
@@ -30,6 +30,8 @@ if __name__ == "__main__":
     
     print(X.head(2))
     print(Y.head(2))
+
+    print(f"spliting with {args.ratio} ratio")
 
     if args.ratio != 0:
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=args.ratio, random_state=args.seed)

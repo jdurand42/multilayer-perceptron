@@ -18,7 +18,7 @@ parser = argparse.ArgumentParser()
 
 features=['F'+str(i) for i in range(0, 30)]
 
-parser.add_argument('--data_path', '-d', type=str, default='../data/df_test.csv',
+parser.add_argument('--data_path', '-d', type=str, default='./data/df_test.csv',
                     help='path to csv file containing data')
 parser.add_argument('--model_path', '-m', type=str, default="mlp.pkl")
 parser.add_argument('--raw', action="store_true")
@@ -35,6 +35,9 @@ if __name__ == "__main__":
     print(args.features)
     df = get_data_pred(args.data_path)
     X = df[features]
+    Y = []
+    if 'diagnosis' in df.columns:
+        Y = df[['diagnosis']]
     print(X.head(5))
     # pred = Y.copy()
     # Y = labelize_Y(Y, y_label="diagnosis", value="M")
@@ -55,16 +58,23 @@ if __name__ == "__main__":
     # print(X.head(5))
 
     y_pred = mlp.predict(X.to_numpy(), raw=args.raw)
-    if (y_pred.shape[1] == 1):
-        pred = pd.DataFrame(data={'diagnosis': y_pred})
+    pred = []
+    # print(y_pred)
+    if (len(y_pred.shape) == 1):
+        for i in range(0, len(y_pred)):
+            if y_pred[i] == 0:
+                pred.append("B")
+            else:
+                pred.append("M")
+        pred = pd.DataFrame(data={'diagnosis': pred})
+            
     else:
         pred = unencode(y_pred, values=["B", "M"], label="diagnosis")
     print(pred.head(args.head))
 
-    # if args.raw is False:
-    #     print("score: ", accuracy_score(Y.to_numpy(), y_pred))
-    # e = mlp.binary_cross_entropy(y_pred, Y.to_numpy(), e=1e-15)
-    # print("Binary cross entropy: ", e)
+    # if len(Y) > 0:
+    e = mlp.binary_cross_entropy(labelize_Y(pred).to_numpy(), labelize_Y(Y).to_numpy())
+    print("Binary cross entropy: ", e)
 
     if args.export is not None:
         pred.to_csv(args.export)

@@ -10,12 +10,13 @@ from MLP import MultiLayerPerceptron
 
 import argparse
 
+import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--data_path_train', type=str, default='../data/df_train.csv',
+parser.add_argument('--data_path_train', type=str, default='./data/df_train.csv',
                     help='path to csv file containing data for train')
-parser.add_argument('--data_path_test', type=str, default='../data/df_test.csv',
+parser.add_argument('--data_path_test', type=str, default='./data/df_test.csv',
                     help='path to csv file containing data for train')
 parser.add_argument('-e','--early_stopping', type=int, default = None,
                     help='number of epochs needed for early stopping')
@@ -31,6 +32,7 @@ parser.add_argument('--hidden_layers_size', type=int, default=32)
 parser.add_argument('--epochs', type=int, default=200)
 parser.add_argument('--no_print', action="store_false")
 parser.add_argument("--verbose", action="store_true")
+parser.add_argument("--graph", action="store_true")
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -99,13 +101,22 @@ if __name__ == "__main__":
     print(cm)
 
     # y_pred_raw = mlp.predict(X_test.to_numpy(), raw=True)
-    e = mlp.binary_cross_entropy(y_pred, Y_test.to_numpy())
-    print("Binary cross entropy: ", e)
+    # e = mlp.binary_cross_entropy(y_pred, Y_test.to_numpy())
+    # print("Binary cross entropy: ", e)
     print("score: ", accuracy_score(Y_test.to_numpy(), y_pred))
-    # e = binary_cross_entropy(y_pred, Y_test.to_numpy())
-    # print(e)
+
+    if args.graph is True:
+        fig, axs = plt.subplots(1, 2)
 
 
+        # plt.clf()
+        axs[0].plot(np.arange(0, mlp.epochs), mlp.metrics['losses'])
+        axs[0].set(xlabel='Epochs')
+        axs[0].set(ylabel='Loss')
+        # plt.show()
 
-
-
+        # axs[0, 1].clf()
+        axs[1].plot(np.arange(0, mlp.epochs), mlp.metrics['scores'])
+        axs[1].set(xlabel='Epochs')
+        axs[1].set(ylabel='Score')
+        plt.show()

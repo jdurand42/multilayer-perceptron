@@ -4,17 +4,8 @@ from sklearn.metrics import r2_score, accuracy_score
 import math
 import pickle
 
-# Tuto
-# https://www.kaggle.com/code/androbomb/simple-nn-with-python-multi-layer-perceptron
-
-# A FAIRE
-# Retirer les commentaires
-# Le prdict doit marcher avec un dataset sans y
-# Faire le softmax
-# 3 scripts
 
 def _sigmoid(x, der=False):
-    # perform sigmoid
     if der is False:
         r = 1 / (1 + np.exp(-x))
     else:
@@ -61,11 +52,7 @@ class MultiLayerPerceptron:
         self.w = []
         self.b = []
         self.layers = []
-        # self.mu = []
         self.metrics = {'losses': [], 'scores': [], 'binary_cross_entropy': []}
-        # self.losses = []
-        # self.scores = []
-        # self.binary_cross_entropy = []
         self.seed = seed
         self.act_f = []
         self.alpha = alpha
@@ -91,33 +78,24 @@ class MultiLayerPerceptron:
         B = []
         delta = []
 
-        # Compute last error
         delta.insert(0, (self.z[len(self.z)-1] - y) * self.act_f[len(self.z)-1](self.z[len(self.z)-1], der=True))
         
-        '''Now we BACKpropagate'''
-        # We thus compute from next-to-last to first
+        # Bqck propagation
         for i in range(0, len(self.z) - 1):
             delta.insert(0, np.dot(delta[0], self.w[len(self.z) - 1 - i]) * self.act_f[len(self.z) - 2 - i](self.z[len(self.z) - 2 - i], der=True))
         
-        # print(delta)
         for i in range(0, len(delta)):
             delta[i] = delta[i] / self.X.shape[0]
-        # print(delta[-1])
    
-        '''GRADIENT DESCENT'''
-        # We start from the first layer that is special, since it is connected to the Input Layer
+        # Gradient
         W.append(self.w[0] - self.alpha * np.kron(delta[0], x).reshape(len(self.z[0]), x.shape[0]))
         B.append(self.b[0] - self.alpha * delta[0])
         
-        # We now descend for all the other Hidden Layers + OutPut Layer
         for i in range(1, len(self.z)):
             W.append(self.w[i] - self.alpha * np.kron(delta[i], self.z[i-1]).reshape(len(self.z[i]), len(self.z[i-1])))
             B.append(self.b[i] - self.alpha * delta[i])
         
 
-        # print(type(self.w[-1]))
-        # print(type(W[-1]))
-        # We return the descended parameters w, b
         return W, B
 
     def reset(self):
@@ -130,12 +108,6 @@ class MultiLayerPerceptron:
             X_test=None, Y_test=None, 
             early_stopping=None, 
             precision=5):
-        # fit
-        # 
-        # init of w and b for each layer
-        # print("init of layers")
-
-        # print("init of input layer")
 
         self.X = X
         self.Y = Y
@@ -245,7 +217,6 @@ class MultiLayerPerceptron:
     def binary_cross_entropy(self, p, y, e=1e-15):
         r = 0
         for i in range(0, len(p)):
-            # p[i] += e
             r += (np.dot(y[i], np.log(p[i]+e))) + (np.dot((1 - y[i]), np.log(1 - p[i]+e)))
         r = -r / len(p)
         return r
